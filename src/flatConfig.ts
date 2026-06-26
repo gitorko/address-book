@@ -46,15 +46,71 @@ export function flatLookupKey(tower: number, floor: number, house: number): stri
   return `${tower}:${floor}:${house}`
 }
 
+export const FIRE_REFUGE_FLATS = [
+  { tower: 6, floor: 18, house: 5, flatNo: '6185' },
+  { tower: 6, floor: 28, house: 5, flatNo: '6305' },
+  { tower: 7, floor: 18, house: 5, flatNo: '7185' },
+  { tower: 7, floor: 28, house: 5, flatNo: '7285' },
+
+] as const
+
+export const FIRE_REFUGE_FLAT_NUMBERS: readonly string[] = FIRE_REFUGE_FLATS.map((flat) => flat.flatNo)
+
+export function isFireRefugeCoordinates(tower: number, floor: number, house: number): boolean {
+  return FIRE_REFUGE_FLATS.some((flat) => flat.tower === tower && flat.floor === floor && flat.house === house)
+}
+
+export function isFireRefugeFlat(
+  entry: Pick<FlatConfigEntry, 'tower' | 'floor' | 'house' | 'flatNo' | 'details'>,
+): boolean {
+  if (isFireRefugeCoordinates(entry.tower, entry.floor, entry.house)) {
+    return true
+  }
+  const flatNo = entry.flatNo?.trim() ?? ''
+  if (flatNo && FIRE_REFUGE_FLAT_NUMBERS.includes(flatNo)) {
+    return true
+  }
+  if (flatNo && /fire refuge/i.test(flatNo)) {
+    return true
+  }
+  return Boolean(entry.details?.trim().toLowerCase().includes('fire refuge'))
+}
+
+export function fireRefugeEntryFor(tower: number, floor: number, house: number): FlatConfigEntry | null {
+  const flat = FIRE_REFUGE_FLATS.find((x) => x.tower === tower && x.floor === floor && x.house === house)
+  if (!flat) return null
+  return {
+    tower: flat.tower,
+    floor: flat.floor,
+    house: flat.house,
+    flatNo: flat.flatNo,
+    owner: '',
+    phone: '',
+    details: 'Fire refuge area',
+  }
+}
+
+export function stripFireRefugeOwners(entries: Iterable<FlatConfigEntry>): FlatConfigEntry[] {
+  return [...entries].filter((entry) => !isFireRefugeFlat(entry))
+}
+
 /** Build an O(1) lookup map from config rows. Later rows overwrite earlier ones for the same key. */
 export function buildFlatLookup(entries: Iterable<FlatConfigEntry>): FlatLookup {
   const map: FlatLookup = new Map()
-  for (const e of entries) {
+  for (const e of stripFireRefugeOwners(entries)) {
     map.set(flatLookupKey(e.tower, e.floor, e.house), {
       flatNo: e.flatNo,
       owner: e.owner,
       phone: e.phone ?? '',
       details: e.details ?? '',
+    })
+  }
+  for (const e of FIRE_REFUGE_FLATS) {
+    map.set(flatLookupKey(e.tower, e.floor, e.house), {
+      flatNo: e.flatNo,
+      owner: '',
+      phone: '',
+      details: 'Fire refuge area',
     })
   }
   return map

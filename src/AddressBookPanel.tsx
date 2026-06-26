@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { facadeHouseIndexFromLogicalHouse } from './buildingConstants'
-import { flatLookupKey, normalizeFlatEntry } from './flatConfig'
+import { flatLookupKey, isFireRefugeFlat, normalizeFlatEntry } from './flatConfig'
 import type { FlatConfigEntry } from './flatConfig'
 import type { FlatLookup } from './flatLookup'
 import type { SelectedHouse } from './scene/ApartmentScene'
 import type { ServiceContact } from './servicesConfig'
 import { buildTowerUnitRows } from './towerDirectory'
 import { getWindowWireframeColor } from './windowColors'
-import type { BulkImportPayload, BulkImportResult } from './api'
+import type { BulkImportPayload, BulkImportResult, DeleteDataResult } from './api'
 
 const PAGE_SIZE = 36
 
@@ -33,6 +32,7 @@ type AddressBookPanelProps = {
   onSaveService: (contact: ServiceContact, originalLabel?: string) => Promise<void>
   onDeleteService: (label: string) => Promise<void>
   onBulkImport: (payload: BulkImportPayload) => Promise<BulkImportResult>
+  onDeleteData: () => Promise<DeleteDataResult>
 }
 
 // ─── Shared input style ────────────────────────────────────────────────────────
@@ -448,6 +448,58 @@ function ImportModal({ onImport, onClose }: ImportModalProps) {
   )
 }
 
+// ─── Delete data modal ────────────────────────────────────────────────────────
+
+type DeleteDataModalProps = {
+  ownerCount: number
+  serviceCount: number
+  onDelete: () => Promise<DeleteDataResult>
+  onClose: () => void
+}
+
+function DeleteDataModal({ ownerCount, serviceCount, onDelete, onClose }: DeleteDataModalProps) {
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleDelete() {
+    if (deleting) return
+    setDeleting(true)
+    setError('')
+    try {
+      await onDelete()
+      onClose()
+    } catch {
+      setError('Failed to delete data — please try again.')
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.14)' }}>
+        <div style={{ fontWeight: 800, fontSize: 17, color: '#111', marginBottom: 6 }}>Delete Data</div>
+        <div style={{ fontSize: 13, color: '#71717a', lineHeight: 1.5, marginBottom: 16 }}>
+          This will remove {ownerCount} owner entries and {serviceCount} service contacts. Fire refuge labels remain.
+        </div>
+        {error && <div style={{ fontSize: 13, color: '#dc2626', background: '#fee2e2', borderRadius: 8, padding: '8px 12px', marginBottom: 12 }}>{error}</div>}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" onClick={onClose}
+            style={{ flex: 1, background: '#f9fafb', border: '1.5px solid #e4e4e7', borderRadius: 10, padding: '10px', color: '#71717a', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600 }}>
+            Cancel
+          </button>
+          <button type="button" onClick={handleDelete} disabled={deleting}
+            style={{ flex: 1, background: deleting ? '#fca5a5' : '#dc2626', border: 'none', borderRadius: 10, padding: '10px', color: '#fff', cursor: deleting ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700 }}>
+            {deleting ? 'Deleting…' : 'Delete data'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Helper functions ──────────────────────────────────────────────────────────
 
 function normalize(s: string): string {
@@ -457,9 +509,7 @@ function normalize(s: string): string {
 function formatPublicFlatNo(entry: Pick<FlatConfigEntry, 'tower' | 'floor' | 'house' | 'flatNo'>): string {
   const configured = entry.flatNo.trim()
   if (configured) return configured
-  const publicFloor = String(entry.floor + 2).padStart(2, '0')
-  const publicUnit = Math.max(1, facadeHouseIndexFromLogicalHouse(entry.house))
-  return `${entry.tower}${publicFloor}${publicUnit}`
+  return `${entry.tower}${String(entry.floor).padStart(2, '0')}${entry.house}`
 }
 
 function formatUnitSummary(entry: Pick<FlatConfigEntry, 'tower' | 'floor' | 'house' | 'flatNo'>): string {
@@ -515,6 +565,7 @@ export function AddressBookPanel({
   onSaveService,
   onDeleteService,
   onBulkImport,
+  onDeleteData,
 }: AddressBookPanelProps) {
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(0)
@@ -524,6 +575,7 @@ export function AddressBookPanel({
   const [showMenu, setShowMenu] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [showImport, setShowImport] = useState(false)
+  const [showDeleteData, setShowDeleteData] = useState(false)
   const selectedRef = useRef(selected)
   // True when the search box itself triggered the selection — prevents clearing the query in that case
   const queryTriggeredSelectRef = useRef(false)
@@ -540,6 +592,7 @@ export function AddressBookPanel({
   }, [query, towerTab, combinedRows, rowsTower6, rowsTower7])
 
   const filtered = useMemo(() => towerRows.filter((e) => {
+    if (isFireRefugeFlat(e)) return entryMatchesQuery(e, query)
     const owner = e.owner.trim()
     return owner !== '' && owner !== '-' && entryMatchesQuery(e, query)
   }), [towerRows, query])
@@ -610,6 +663,15 @@ export function AddressBookPanel({
   const selectedDisplayInfo = selected
     ? { tower: selected.tower, floor: selected.floor, house: selected.house, flatNo: selectedInfo?.flatNo ?? '' }
     : undefined
+  const selectedIsFireRefuge = Boolean(
+    selectedDisplayInfo && isFireRefugeFlat({
+      tower: selectedDisplayInfo.tower,
+      floor: selectedDisplayInfo.floor,
+      house: selectedDisplayInfo.house,
+      flatNo: selectedDisplayInfo.flatNo,
+      details: selectedInfo?.details ?? '',
+    }),
+  )
 
   if (collapsed) {
     return (
@@ -646,6 +708,7 @@ export function AddressBookPanel({
                         {[
                           { icon: '📤', label: 'Export data', action: () => { setShowExport(true); setShowMenu(false) } },
                           { icon: '📥', label: 'Import data', action: () => { setShowImport(true); setShowMenu(false) } },
+                          { icon: '🗑️', label: 'Delete data', action: () => { setShowDeleteData(true); setShowMenu(false) } },
                           { icon: '🚪', label: 'Sign out', action: () => { setShowMenu(false); onSignOut() } },
                         ].map(({ icon, label, action }, i, arr) => (
                           <button key={label} onClick={action}
@@ -713,7 +776,7 @@ export function AddressBookPanel({
           <div className="address-book__selection-head">
             <span className="address-book__selection-title">📍 Selected unit</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {isAdmin && selectedDisplayInfo && (
+              {isAdmin && selectedDisplayInfo && !selectedIsFireRefuge && (
                 <button type="button"
                   onClick={() => {
                     const entry: FlatConfigEntry = {
@@ -743,13 +806,13 @@ export function AddressBookPanel({
             )}
             <p className="address-book__label-inline">Owner</p>
             <p className="address-book__selection-value address-book__selection-owner">
-              {selectedInfo?.owner?.trim() ? selectedInfo.owner : 'Not listed (window shown white in model)'}
+              {selectedIsFireRefuge ? 'Fire refuge' : selectedInfo?.owner?.trim() ? selectedInfo.owner : 'Not listed (window shown white in model)'}
             </p>
             <p className="address-book__label-inline">Phone</p>
-            <p className="address-book__selection-value">{selectedInfo?.phone?.trim() ? selectedInfo.phone : '—'}</p>
+            <p className="address-book__selection-value">{selectedIsFireRefuge ? '—' : selectedInfo?.phone?.trim() ? selectedInfo.phone : '—'}</p>
             <p className="address-book__label-inline">Details</p>
             <p className="address-book__selection-value address-book__selection-details">
-              {selectedInfo?.details?.trim() ? selectedInfo.details : '—'}
+              {selectedIsFireRefuge ? 'Fire refuge area — no owners assigned.' : selectedInfo?.details?.trim() ? selectedInfo.details : '—'}
             </p>
           </div>
         </div>
@@ -821,7 +884,8 @@ export function AddressBookPanel({
               ) : (
                 pageSlice.map((e) => {
                   const col = getWindowWireframeColor(e.tower, e.floor, e.house, lookup)
-                  const ownerLabel = e.owner.trim() || 'Vacant'
+                  const isFireRefuge = isFireRefugeFlat(e)
+                  const ownerLabel = isFireRefuge ? 'Fire refuge' : e.owner.trim() || 'Vacant'
                   const phoneLabel = e.phone.trim()
                   const detailsRaw = e.details.trim()
                   const unitSummary = formatUnitSummary(e)
@@ -843,7 +907,7 @@ export function AddressBookPanel({
                             <span className="address-book__meta">{unitSummary}</span>
                           </span>
                         </button>
-                        {isAdmin && (
+                        {isAdmin && !isFireRefuge && (
                           <button type="button"
                             onClick={() => setEditingOwner(e)}
                             style={{ background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#6b7280', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0, alignSelf: 'flex-start' }}>
@@ -918,6 +982,16 @@ export function AddressBookPanel({
         <ImportModal
           onImport={onBulkImport}
           onClose={() => setShowImport(false)}
+        />
+      )}
+
+      {/* ── Delete data modal ── */}
+      {showDeleteData && (
+        <DeleteDataModal
+          ownerCount={entries.length}
+          serviceCount={serviceContacts.length}
+          onDelete={onDeleteData}
+          onClose={() => setShowDeleteData(false)}
         />
       )}
     </aside>

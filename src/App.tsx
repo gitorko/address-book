@@ -12,6 +12,7 @@ import {
   ownerEntryId,
   servicesApi,
   bulkImport,
+  deleteData,
   type BulkImportPayload,
 } from './api'
 import { SCENE_TARGET_OFFSET_X, TOWER_ID_LEFT } from './buildingConstants'
@@ -226,6 +227,15 @@ export default function App() {
     [],
   )
 
+  const handleDeleteData = useCallback(async () => {
+    const result = await deleteData()
+    setEntries([])
+    setFlatLookup(buildFlatLookup([]))
+    setServiceContacts([])
+    setSelected(null)
+    return result
+  }, [])
+
   return (
     <div className="app-root">
       <div className="canvas-wrap">
@@ -285,6 +295,7 @@ export default function App() {
         onSaveService={handleSaveService}
         onDeleteService={handleDeleteService}
         onBulkImport={handleBulkImport}
+        onDeleteData={handleDeleteData}
       />
 
       {showLoginModal && (

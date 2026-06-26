@@ -1,6 +1,8 @@
 import {
   buildFlatLookup,
+  isFireRefugeFlat,
   normalizeFlatEntry,
+  stripFireRefugeOwners,
   type FlatConfigEntry,
 } from './flatConfig'
 import type { FlatLookup } from './flatLookup'
@@ -80,6 +82,9 @@ export const ownersApi = IS_DEV
   ? {
       getAll: (): Promise<FlatConfigEntry[]> => Promise.resolve(localOwners.getAll()),
       upsert: (entry: FlatConfigEntry): Promise<FlatConfigEntry> => {
+        if (isFireRefugeFlat(entry)) {
+          return Promise.reject(new Error('Fire refuge areas cannot be assigned to owners.'))
+        }
         const id = ownerEntryId(entry)
         const list = localOwners.getAll()
         const idx = list.findIndex((e) => ownerEntryId(e) === id)
@@ -95,12 +100,16 @@ export const ownersApi = IS_DEV
     }
   : {
       getAll: (): Promise<FlatConfigEntry[]> => fetch('/api/owners').then((r) => r.json()),
-      upsert: (entry: FlatConfigEntry): Promise<FlatConfigEntry> =>
-        authFetch('/api/owners', {
+      upsert: (entry: FlatConfigEntry): Promise<FlatConfigEntry> => {
+        if (isFireRefugeFlat(entry)) {
+          return Promise.reject(new Error('Fire refuge areas cannot be assigned to owners.'))
+        }
+        return authFetch('/api/owners', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(entry),
-        }).then((r) => r.json()),
+        }).then((r) => r.json())
+      },
       remove: (id: string): Promise<void> =>
         authFetch(`/api/owners/${encodeURIComponent(id)}`, { method: 'DELETE' }).then(() => undefined),
     }
@@ -111,11 +120,11 @@ export const ownersApi = IS_DEV
  */
 export async function loadOwners(): Promise<{ lookup: FlatLookup; entries: FlatConfigEntry[] }> {
   if (IS_DEV) {
-    const list = localOwners.getAll().map(normalizeFlatEntry)
+    const list = stripFireRefugeOwners(localOwners.getAll().map(normalizeFlatEntry))
     return { lookup: buildFlatLookup(list), entries: list }
   }
   const raw: FlatConfigEntry[] = await fetch('/api/owners').then((r) => r.json())
-  const list = raw.map(normalizeFlatEntry)
+  const list = stripFireRefugeOwners(raw.map(normalizeFlatEntry))
   return { lookup: buildFlatLookup(list), entries: list }
 }
 
@@ -198,8 +207,13 @@ export type BulkImportResult = {
   servicesImported: number
 }
 
+export type DeleteDataResult = {
+  ownersDeleted: number
+  servicesDeleted: number
+}
+
 export async function bulkImport(payload: BulkImportPayload): Promise<BulkImportResult> {
-  const flats = (payload.flats ?? []).map(normalizeFlatEntry)
+  const flats = stripFireRefugeOwners((payload.flats ?? []).map(normalizeFlatEntry))
   const services = payload.services ?? []
 
   if (IS_DEV) {
@@ -222,4 +236,16 @@ export async function bulkImport(payload: BulkImportPayload): Promise<BulkImport
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ flats, services }),
   }).then((r) => r.json())
+}
+
+export async function deleteData(): Promise<DeleteDataResult> {
+  if (IS_DEV) {
+    const ownersDeleted = localOwners.getAll().length
+    const servicesDeleted = localServices.getAll().length
+    localOwners.save([])
+    localServices.save([])
+    return { ownersDeleted, servicesDeleted }
+  }
+
+  return authFetch('/api/import', { method: 'DELETE' }).then((r) => r.json())
 }
