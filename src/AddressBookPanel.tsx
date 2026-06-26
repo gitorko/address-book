@@ -827,10 +827,9 @@ export function AddressBookPanel({
                   const unitSummary = formatUnitSummary(e)
                   return (
                     <li key={`${e.tower}-${e.floor}-${e.house}`}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div className={`address-book__row ${isRowSelected(e) ? 'address-book__row--active' : ''}`}>
                         <button type="button"
-                          className={`address-book__row ${isRowSelected(e) ? 'address-book__row--active' : ''}`}
-                          style={{ flex: 1 }}
+                          style={{ flex: 1, display: 'flex', alignItems: 'flex-start', gap: '0.6rem', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', minWidth: 0 }}
                           onClick={() => { setQuery(''); setPage(0); onSelectRow(e.tower, e.floor, e.house) }}>
                           <span className="address-book__swatch"
                             style={{ backgroundColor: `#${col.getHexString()}` }}
@@ -847,7 +846,7 @@ export function AddressBookPanel({
                         {isAdmin && (
                           <button type="button"
                             onClick={() => setEditingOwner(e)}
-                            style={{ background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#6b7280', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0 }}>
+                            style={{ background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#6b7280', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0, alignSelf: 'flex-start' }}>
                             Edit
                           </button>
                         )}
