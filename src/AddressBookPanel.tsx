@@ -628,7 +628,7 @@ export function AddressBookPanel({
         <div className="address-book__header-top">
           <div className="address-book__title-wrap">
             <h2 className="address-book__title">Address book</h2>
-            <span className="address-book__version" aria-label="Version 1.0">v1.0</span>
+            <span className="address-book__version" aria-label="Version 2.0">v2.0</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {isAdmin ? (
@@ -636,21 +636,21 @@ export function AddressBookPanel({
                 {/* ⋮ Menu */}
                 <div style={{ position: 'relative' }}>
                   <button type="button" onClick={() => setShowMenu((m) => !m)}
-                    style={{ background: '#f9fafb', border: '1px solid #e4e4e7', borderRadius: 7, padding: '4px 9px', fontSize: 15, color: '#71717a', cursor: 'pointer', lineHeight: 1 }}>
+                    style={{ background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, color: '#6b7280', cursor: 'pointer', lineHeight: 1, fontFamily: 'inherit', transition: 'background 0.12s' }}>
                     ⋮
                   </button>
                   {showMenu && (
                     <>
                       <div style={{ position: 'fixed', inset: 0, zIndex: 90 }} onClick={() => setShowMenu(false)} />
-                      <div style={{ position: 'absolute', right: 0, top: 34, background: '#fff', border: '1.5px solid #e4e4e7', borderRadius: 12, boxShadow: '0 8px 30px rgba(0,0,0,0.1)', zIndex: 100, minWidth: 170, overflow: 'hidden' }}>
+                      <div style={{ position: 'absolute', right: 0, top: 36, background: '#fff', border: '1.5px solid #f1f5f9', borderRadius: 14, boxShadow: '0 4px 6px rgba(0,0,0,0.05), 0 12px 40px rgba(0,0,0,0.1)', zIndex: 100, minWidth: 180, overflow: 'hidden' }}>
                         {[
                           { icon: '📤', label: 'Export data', action: () => { setShowExport(true); setShowMenu(false) } },
                           { icon: '📥', label: 'Import data', action: () => { setShowImport(true); setShowMenu(false) } },
-                          { icon: '🚪', label: 'Sign out', action: () => { setShowMenu(false); onSignOut() }, danger: false },
-                        ].map(({ icon, label, action }) => (
+                          { icon: '🚪', label: 'Sign out', action: () => { setShowMenu(false); onSignOut() } },
+                        ].map(({ icon, label, action }, i, arr) => (
                           <button key={label} onClick={action}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#111', fontFamily: 'inherit', textAlign: 'left' }}>
-                            <span>{icon}</span>{label}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 15px', background: 'none', border: 'none', borderTop: i > 0 ? '1px solid #f3f4f6' : 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: i === arr.length - 1 ? '#dc2626' : '#111827', fontFamily: 'inherit', textAlign: 'left' }}>
+                            <span style={{ fontSize: 15 }}>{icon}</span>{label}
                           </button>
                         ))}
                       </div>
@@ -660,7 +660,7 @@ export function AddressBookPanel({
               </>
             ) : (
               <button type="button" onClick={onSignIn}
-                style={{ background: '#2563eb', border: 'none', borderRadius: 7, padding: '4px 10px', fontSize: 12, color: '#fff', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                style={{ background: 'linear-gradient(135deg, #0f766e, #115e59)', border: 'none', borderRadius: 100, padding: '4px 13px', fontSize: 12, color: '#fff', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, letterSpacing: '0.02em', boxShadow: '0 2px 8px rgba(15,118,110,0.28)' }}>
                 Admin
               </button>
             )}
@@ -671,8 +671,8 @@ export function AddressBookPanel({
           </div>
         </div>
         {isAdmin && (
-          <div style={{ fontSize: 11, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '4px 10px', marginTop: 6, fontWeight: 600 }}>
-            Admin mode — you can edit owners and services
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#0f766e', background: '#f0fdfa', border: '1px solid #99f6e4', borderRadius: 8, padding: '5px 10px', marginTop: 7, fontWeight: 600 }}>
+            <span style={{ fontSize: 13 }}>🛡️</span> Admin mode — edit owners &amp; services
           </div>
         )}
         <p className="address-book__hint">
@@ -700,15 +700,18 @@ export function AddressBookPanel({
 
       <label className="address-book__search-label">
         <span className="visually-hidden">Search</span>
-        <input className="address-book__search" type="search"
-          placeholder="Search services, names, phone, details, flat no., floor..."
-          value={query} onChange={(ev) => { setQuery(ev.target.value); setPage(0) }} autoComplete="off" />
+        <div className="address-book__search-wrap">
+          <span className="address-book__search-icon" aria-hidden>⌕</span>
+          <input className="address-book__search" type="search"
+            placeholder="Search names, phone, flat no., floor…"
+            value={query} onChange={(ev) => { setQuery(ev.target.value); setPage(0) }} autoComplete="off" />
+        </div>
       </label>
 
       {selected && activeTab !== 'services' && (
         <div className="address-book__selection">
           <div className="address-book__selection-head">
-            <span className="address-book__selection-title">Selected unit</span>
+            <span className="address-book__selection-title">📍 Selected unit</span>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               {isAdmin && selectedDisplayInfo && (
                 <button type="button"
@@ -724,44 +727,46 @@ export function AddressBookPanel({
                     }
                     setEditingOwner(entry)
                   }}
-                  style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '3px 8px', fontSize: 11, color: '#2563eb', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
+                  style={{ background: '#fff', border: '1.5px solid #0f766e', borderRadius: 100, padding: '2px 10px', fontSize: 11, color: '#0f766e', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700 }}>
                   Edit
                 </button>
               )}
               <button type="button" className="address-book__selection-clear"
                 onClick={() => { setQuery(''); setPage(0); onDismissSelection() }}>
-                Clear
+                ✕ Clear
               </button>
             </div>
           </div>
-          {selectedDisplayInfo && (
-            <p className="address-book__selection-line">{formatUnitSummary(selectedDisplayInfo)}</p>
-          )}
-          <p className="address-book__label-inline">Owner</p>
-          <p className="address-book__selection-value address-book__selection-owner">
-            {selectedInfo?.owner?.trim() ? selectedInfo.owner : 'Not listed (window shown white in model)'}
-          </p>
-          <p className="address-book__label-inline">Phone</p>
-          <p className="address-book__selection-value">{selectedInfo?.phone?.trim() ? selectedInfo.phone : '—'}</p>
-          <p className="address-book__label-inline">Details</p>
-          <p className="address-book__selection-value address-book__selection-details">
-            {selectedInfo?.details?.trim() ? selectedInfo.details : '—'}
-          </p>
+          <div className="address-book__selection-body">
+            {selectedDisplayInfo && (
+              <p className="address-book__selection-line">{formatUnitSummary(selectedDisplayInfo)}</p>
+            )}
+            <p className="address-book__label-inline">Owner</p>
+            <p className="address-book__selection-value address-book__selection-owner">
+              {selectedInfo?.owner?.trim() ? selectedInfo.owner : 'Not listed (window shown white in model)'}
+            </p>
+            <p className="address-book__label-inline">Phone</p>
+            <p className="address-book__selection-value">{selectedInfo?.phone?.trim() ? selectedInfo.phone : '—'}</p>
+            <p className="address-book__label-inline">Details</p>
+            <p className="address-book__selection-value address-book__selection-details">
+              {selectedInfo?.details?.trim() ? selectedInfo.details : '—'}
+            </p>
+          </div>
         </div>
       )}
 
       {/* ── Services tab ── */}
       {activeTab === 'services' ? (
         <div className="address-book__list-wrap">
-          {isAdmin && (
-            <div style={{ padding: '8px 12px 0' }}>
-              <button type="button" onClick={() => setEditingService('new')}
-                style={{ width: '100%', padding: '9px', borderRadius: 10, border: '1.5px dashed #bfdbfe', background: '#eff6ff', color: '#2563eb', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}>
-                + Add Service
-              </button>
-            </div>
-          )}
           <div className="address-book__list-scroll">
+            {isAdmin && (
+              <div style={{ padding: '8px 0 4px' }}>
+                <button type="button" onClick={() => setEditingService('new')}
+                  style={{ width: '100%', padding: '9px', borderRadius: 12, border: '1.5px dashed #99f6e4', background: '#f0fdfa', color: '#0f766e', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700 }}>
+                  + Add Service
+                </button>
+              </div>
+            )}
             <ul className="address-book__list address-book__services-list">
               {filteredServiceContacts.length === 0 ? (
                 <li className="address-book__empty">No service contacts match.</li>
@@ -777,7 +782,7 @@ export function AddressBookPanel({
                           <h3 className="address-book__service-title">{contact.label}</h3>
                           {isAdmin && (
                             <button type="button" onClick={() => setEditingService(contact)}
-                              style={{ marginLeft: 'auto', background: '#f9fafb', border: '1px solid #e4e4e7', borderRadius: 6, padding: '3px 8px', fontSize: 11, color: '#71717a', cursor: 'pointer', fontFamily: 'inherit' }}>
+                              style={{ marginLeft: 'auto', background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#6b7280', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0 }}>
                               Edit
                             </button>
                           )}
@@ -842,7 +847,7 @@ export function AddressBookPanel({
                         {isAdmin && (
                           <button type="button"
                             onClick={() => setEditingOwner(e)}
-                            style={{ background: '#f9fafb', border: '1px solid #e4e4e7', borderRadius: 6, padding: '3px 8px', fontSize: 11, color: '#71717a', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 }}>
+                            style={{ background: '#f3f4f6', border: '1.5px solid #e5e7eb', borderRadius: 100, padding: '3px 10px', fontSize: 11, color: '#6b7280', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, flexShrink: 0 }}>
                             Edit
                           </button>
                         )}

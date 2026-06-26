@@ -1,12 +1,23 @@
 :root {
-  --panel-bg: rgba(255, 255, 255, 0.9);
-  --panel-border: rgba(31, 41, 55, 0.14);
-  --panel-text: #17201a;
-  --panel-muted: #5f6b62;
-  --panel-soft: #f5f7f2;
-  --panel-accent: #25635a;
-  --panel-accent-soft: rgba(37, 99, 90, 0.1);
+  --teal-50:  #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
+
+  --panel-bg:          #ffffff;
+  --panel-border:      rgba(0, 0, 0, 0.08);
+  --panel-text:        #111827;
+  --panel-muted:       #6b7280;
+  --panel-soft:        #f9fafb;
+  --panel-accent:      var(--teal-700);
+  --panel-accent-mid:  var(--teal-600);
+  --panel-accent-soft: var(--teal-50);
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+
   font-family: var(--sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -30,6 +41,8 @@ body,
 body {
   background: #cfeaff;
 }
+
+/* ─── App layout ─────────────────────────────────────────────────────────────*/
 
 .app-root {
   display: flex;
@@ -56,26 +69,30 @@ body {
   touch-action: none;
 }
 
+/* ─── App header overlay (top-left on canvas) ────────────────────────────────*/
+
 .app-header {
   position: absolute;
   left: 1.25rem;
   top: 1.25rem;
   max-width: min(26rem, calc(100% - 2.5rem));
   padding: 0.85rem 1rem;
-  border-radius: 8px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(14px);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
   pointer-events: none;
-  box-shadow: 0 16px 36px rgba(31, 41, 55, 0.1);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .app-title {
   margin: 0;
   font-size: 1.45rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: #000;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
   display: flex;
   align-items: baseline;
   gap: 0.35rem;
@@ -83,21 +100,9 @@ body {
   white-space: nowrap;
 }
 
-.app-title__word {
-  font-weight: 700;
-  color: #000;
-}
-
-.app-title__word--secondary {
-  font-weight: 700;
-  color: #000;
-}
-
-.app-title__amp {
-  font-weight: 700;
-  font-size: 0.92em;
-  color: #000;
-}
+.app-title__word         { font-weight: 700; color: #0f172a; }
+.app-title__word--secondary { font-weight: 700; color: #0f172a; }
+.app-title__amp          { font-weight: 700; font-size: 0.92em; color: #0f172a; }
 
 .app-subtitle {
   margin: 0;
@@ -109,8 +114,10 @@ body {
 .app-code {
   font-family: ui-monospace, Consolas, monospace;
   font-size: 0.78em;
-  color: #333333;
+  color: #475569;
 }
+
+/* ─── Selection panel (floating card on canvas) ──────────────────────────────*/
 
 .selection-panel {
   position: absolute;
@@ -118,11 +125,13 @@ body {
   bottom: 1.25rem;
   width: min(22rem, calc(100% - 2.5rem));
   padding: 1.15rem 1.25rem 1.25rem;
-  border-radius: 12px;
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 .selection-panel__close {
@@ -137,6 +146,7 @@ body {
   cursor: pointer;
   padding: 0.25rem 0.45rem;
   border-radius: 6px;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .selection-panel__close:hover {
@@ -181,6 +191,8 @@ body {
   color: var(--panel-text);
 }
 
+/* ─── Accessibility ───────────────────────────────────────────────────────────*/
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -193,6 +205,8 @@ body {
   border: 0;
 }
 
+/* ─── Address book sidebar ────────────────────────────────────────────────────*/
+
 .address-book {
   flex: 0 0 min(390px, 40vw);
   max-width: 430px;
@@ -200,8 +214,8 @@ body {
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--panel-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 247, 0.98));
-  box-shadow: -14px 0 38px rgba(31, 41, 55, 0.09);
+  background: #ffffff;
+  box-shadow: -4px 0 40px rgba(0, 0, 0, 0.07);
 }
 
 .address-book--collapsed {
@@ -210,6 +224,7 @@ body {
   min-width: 3rem;
   align-items: stretch;
   padding: 0.5rem 0;
+  background: var(--panel-soft);
 }
 
 .address-book__toggle {
@@ -223,43 +238,30 @@ body {
   cursor: pointer;
   font: inherit;
   line-height: 1;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
 .address-book__toggle:hover {
   color: var(--panel-text);
-  background: rgba(37, 99, 90, 0.08);
+  background: rgba(15, 118, 110, 0.08);
 }
 
 .address-book__toggle:focus-visible {
-  outline: 2px solid rgba(37, 99, 90, 0.4);
+  outline: 2px solid rgba(15, 118, 110, 0.4);
   outline-offset: 2px;
 }
 
-.address-book__toggle-icon {
-  font-size: 1.15rem;
-  font-weight: 600;
-}
+.address-book__toggle-icon          { font-size: 1.15rem; font-weight: 600; }
+.address-book__toggle--collapse     { flex-shrink: 0; width: 2.25rem; height: 2.25rem; padding: 0; }
+.address-book__toggle--expand       { flex: 1; min-height: 4rem; padding: 0.5rem; }
+.address-book__toggle--expand .address-book__toggle-icon { font-size: 1.35rem; }
 
-.address-book__toggle--collapse {
-  flex-shrink: 0;
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-}
-
-.address-book__toggle--expand {
-  flex: 1;
-  min-height: 4rem;
-  padding: 0.5rem;
-}
-
-.address-book__toggle--expand .address-book__toggle-icon {
-  font-size: 1.35rem;
-}
+/* ─── Header ──────────────────────────────────────────────────────────────────*/
 
 .address-book__header {
-  padding: 1.1rem 1rem 0.55rem;
+  padding: 1rem 1rem 0.6rem;
   flex-shrink: 0;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .address-book__header-top {
@@ -280,8 +282,9 @@ body {
 
 .address-book__title {
   margin: 0;
-  font-size: 1.16rem;
+  font-size: 1.12rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--panel-text);
   min-width: 0;
 }
@@ -289,36 +292,43 @@ body {
 .address-book__version {
   font-size: 0.58rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--panel-accent);
-  line-height: 1;
+  background: var(--teal-50);
+  border: 1px solid var(--teal-100);
+  border-radius: 100px;
+  padding: 1px 5px;
+  line-height: 1.4;
   white-space: nowrap;
 }
 
 .address-book__hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.76rem;
+  margin: 0.3rem 0 0;
+  font-size: 0.73rem;
   color: var(--panel-muted);
-  line-height: 1.35;
+  line-height: 1.4;
 }
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────────*/
 
 .address-book__tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.35rem;
-  padding: 0.2rem 1rem 0.8rem;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem 0.5rem;
   flex-shrink: 0;
+  background: #fff;
 }
 
 .address-book__tab {
   min-width: 0;
-  min-height: 2.35rem;
-  padding: 0.42rem 0.45rem;
+  min-height: 2.1rem;
+  padding: 0.38rem 0.5rem;
   font-size: 0.76rem;
-  font-weight: 650;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: rgba(31, 41, 55, 0.04);
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  border-radius: 100px;
+  background: #f3f4f6;
   color: var(--panel-muted);
   cursor: pointer;
   display: inline-flex;
@@ -327,111 +337,147 @@ body {
   text-align: center;
   line-height: 1.2;
   white-space: normal;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.address-book__tab:hover {
-  color: var(--panel-text);
-  background: rgba(37, 99, 90, 0.08);
+.address-book__tab:hover:not(.address-book__tab--active) {
+  background: var(--teal-50);
+  color: var(--teal-700);
+  border-color: var(--teal-100);
 }
 
 .address-book__tab--active {
-  background: var(--panel-accent);
+  background: var(--teal-700);
   color: #fff;
-  border-color: var(--panel-accent);
-  box-shadow: 0 8px 18px rgba(37, 99, 90, 0.18);
+  border-color: var(--teal-700);
+  box-shadow: 0 2px 10px rgba(15, 118, 110, 0.28);
 }
+
+/* ─── Search box ──────────────────────────────────────────────────────────────*/
 
 .address-book__search-label {
   display: block;
-  padding: 0 1rem 0.75rem;
+  padding: 0.4rem 1rem 0.65rem;
   flex-shrink: 0;
+}
+
+.address-book__search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.address-book__search-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  pointer-events: none;
+  line-height: 1;
 }
 
 .address-book__search {
   width: 100%;
-  padding: 0.63rem 0.7rem;
-  font-size: 0.88rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  background: #fff;
+  padding: 0.6rem 0.9rem 0.6rem 2.2rem;
+  font-size: 0.86rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
+  background: #f9fafb;
   color: var(--panel-text);
-  box-shadow: 0 1px 0 rgba(31, 41, 55, 0.04);
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .address-book__search:focus {
-  outline: 2px solid rgba(37, 99, 90, 0.28);
-  outline-offset: 1px;
-  border-color: rgba(37, 99, 90, 0.55);
+  outline: none;
+  border-color: var(--teal-600);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
 }
 
+/* ─── Selected unit card ──────────────────────────────────────────────────────*/
+
 .address-book__selection {
-  margin: 0 1rem 0.75rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(37, 99, 90, 0.2);
-  background: var(--panel-accent-soft);
+  margin: 0 1rem 0.65rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--teal-100);
+  background: var(--teal-50);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .address-book__selection-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.85rem 0.55rem;
+  background: rgba(15, 118, 110, 0.07);
+  border-bottom: 1px solid var(--teal-100);
+}
+
+.address-book__selection-body {
+  padding: 0.65rem 0.85rem 0.75rem;
 }
 
 .address-book__selection-title {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--panel-muted);
+  letter-spacing: 0.08em;
+  color: var(--teal-700);
 }
 
 .address-book__selection-clear {
-  font-size: 0.78rem;
-  padding: 0.2rem 0.45rem;
-  border: none;
-  background: transparent;
-  color: var(--panel-accent);
+  font-size: 0.76rem;
+  padding: 0.18rem 0.5rem;
+  border: 1px solid var(--teal-200);
+  background: #fff;
+  color: var(--teal-700);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 100px;
+  font-family: inherit;
+  font-weight: 600;
+  transition: background 0.12s ease;
 }
 
 .address-book__selection-clear:hover {
-  background: rgba(37, 99, 90, 0.1);
+  background: var(--teal-100);
 }
 
 .address-book__selection-line {
-  margin: 0 0 0.35rem;
-  font-weight: 600;
-  font-size: 0.92rem;
+  margin: 0 0 0.45rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--panel-text);
 }
 
 .address-book__label-inline {
-  margin: 0.35rem 0 0.15rem;
-  font-size: 0.65rem;
-  font-weight: 600;
+  margin: 0.4rem 0 0.1rem;
+  font-size: 0.63rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--panel-muted);
 }
 
 .address-book__selection-value {
-  margin: 0 0 0.35rem;
-  font-size: 0.9rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.88rem;
+  color: var(--panel-text);
 }
 
 .address-book__selection-owner {
-  font-weight: 500;
+  font-weight: 600;
 }
+
+/* ─── List area ───────────────────────────────────────────────────────────────*/
 
 .address-book__list-wrap {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 0.85rem;
+  padding: 0 0.75rem;
 }
 
 .address-book__list-scroll {
@@ -441,39 +487,51 @@ body {
   padding-bottom: 0.5rem;
 }
 
+/* custom scrollbar */
+.address-book__list-scroll::-webkit-scrollbar       { width: 5px; }
+.address-book__list-scroll::-webkit-scrollbar-track  { background: transparent; }
+.address-book__list-scroll::-webkit-scrollbar-thumb  { background: #d1d5db; border-radius: 100px; }
+.address-book__list-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ─── Pagination ──────────────────────────────────────────────────────────────*/
+
 .address-book__pager {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.65rem 0 1rem;
-  border-top: 1px solid var(--panel-border);
-  background: rgba(249, 251, 247, 0.98);
+  padding: 0.6rem 0 0.9rem;
+  border-top: 1px solid #f3f4f6;
+  background: #fff;
 }
 
 .address-book__pager-btn {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 100px;
   background: #fff;
   color: var(--panel-text);
   cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
 
 .address-book__pager-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .address-book__pager-btn:not(:disabled):hover {
-  background: var(--panel-soft);
+  background: var(--teal-50);
+  border-color: var(--teal-200);
+  color: var(--teal-700);
 }
 
 .address-book__pager-meta {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--panel-muted);
   text-align: center;
   flex: 1;
@@ -483,56 +541,62 @@ body {
   color: var(--panel-muted);
 }
 
+/* ─── List rows ───────────────────────────────────────────────────────────────*/
+
 .address-book__list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.35rem 0 0;
 }
 
 .address-book__empty {
-  padding: 1rem 0.5rem;
-  font-size: 0.88rem;
+  padding: 2rem 0.5rem;
+  font-size: 0.85rem;
   color: var(--panel-muted);
+  text-align: center;
 }
 
 .address-book__row {
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.64rem 0.58rem;
-  margin-bottom: 0.35rem;
+  gap: 0.6rem;
+  padding: 0.68rem 0.7rem;
+  margin-bottom: 0.28rem;
   text-align: left;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 12px;
   background: #fff;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .address-book__row:hover {
-  border-color: rgba(37, 99, 90, 0.22);
-  background: #fbfcf8;
+  border-color: var(--teal-200);
+  background: var(--teal-50);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.08);
 }
 
 .address-book__row--active {
-  border-color: var(--panel-accent);
-  background: var(--panel-accent-soft);
+  border-color: var(--teal-600);
+  background: var(--teal-50);
+  box-shadow: 0 2px 12px rgba(15, 118, 110, 0.14);
 }
 
+/* Color swatch dot */
 .address-book__swatch {
   flex-shrink: 0;
-  width: 12px;
-  height: 28px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  margin-top: 2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 0, 0, 0.14);
+  margin-top: 5px;
 }
 
 .address-book__row-main {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.18rem;
   min-width: 0;
   flex: 1;
 }
@@ -540,21 +604,22 @@ body {
 .address-book__row-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(3.5rem, auto) minmax(0, 1.1fr);
-  gap: 0.35rem 0.5rem;
+  gap: 0.3rem 0.5rem;
   align-items: baseline;
   width: 100%;
 }
 
 .address-book__owner {
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.87rem;
+  font-weight: 650;
   color: var(--panel-text);
   overflow-wrap: break-word;
   word-break: normal;
+  line-height: 1.3;
 }
 
 .address-book__phone-col {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--panel-muted);
   text-align: right;
@@ -563,7 +628,7 @@ body {
 }
 
 .address-book__details-col {
-  font-size: 0.78rem;
+  font-size: 0.77rem;
   font-weight: 400;
   color: var(--panel-muted);
   min-width: 0;
@@ -579,93 +644,110 @@ body {
 }
 
 .address-book__meta {
-  font-size: 0.78rem;
-  color: var(--panel-muted);
+  font-size: 0.74rem;
+  color: #9ca3af;
+  letter-spacing: 0.01em;
 }
+
+/* ─── Service cards ───────────────────────────────────────────────────────────*/
 
 .address-book__services-list {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.5rem;
+  padding-top: 0.35rem;
 }
 
 .address-book__service-card {
-  padding: 0.72rem;
-  border: 1px solid rgba(31, 41, 55, 0.1);
-  border-radius: 8px;
+  padding: 0.75rem 0.8rem;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 14px;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.address-book__service-card:hover {
+  border-color: var(--teal-200);
+  box-shadow: 0 2px 10px rgba(15, 118, 110, 0.08);
 }
 
 .address-book__service-head {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.6rem;
   margin-bottom: 0.65rem;
 }
 
 .address-book__service-icon {
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 2rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: 0 0 2.1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: var(--panel-accent-soft);
-  color: var(--panel-accent);
-  font-size: 0.82rem;
-  font-weight: 750;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal-600) 0%, var(--teal-800) 100%);
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
 }
 
 .address-book__service-title {
   min-width: 0;
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--panel-text);
 }
 
 .address-book__service-fields {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.35rem;
   margin: 0;
 }
 
 .address-book__service-field {
   display: grid;
   grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: 0.55rem;
+  gap: 0.5rem;
   align-items: baseline;
 }
 
 .address-book__service-field dt {
   color: var(--panel-muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .address-book__service-field dd {
   min-width: 0;
   margin: 0;
   color: var(--panel-text);
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   overflow-wrap: anywhere;
 }
 
 .address-book__service-field a {
-  color: var(--panel-accent);
-  font-weight: 650;
+  color: var(--teal-700);
+  font-weight: 600;
   text-decoration: none;
 }
 
 .address-book__service-field a:hover {
   text-decoration: underline;
+  color: var(--teal-600);
 }
 
 .address-book__muted-value {
-  color: var(--panel-muted);
+  color: #d1d5db;
+  font-style: italic;
 }
+
+/* ─── Responsive ──────────────────────────────────────────────────────────────*/
 
 @media (max-width: 640px) {
   .app-header {
@@ -681,22 +763,22 @@ body {
   }
 
   .address-book__header {
-    padding: 0.95rem 0.7rem 0.45rem;
+    padding: 0.85rem 0.75rem 0.5rem;
   }
 
   .address-book__tabs,
   .address-book__search-label {
-    padding-left: 0.7rem;
-    padding-right: 0.7rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 
   .address-book__list-wrap {
-    padding: 0 0.65rem;
+    padding: 0 0.6rem;
   }
 
   .address-book__service-field {
     grid-template-columns: 3rem minmax(0, 1fr);
-    gap: 0.45rem;
+    gap: 0.4rem;
   }
 
   .address-book__pager {
@@ -728,7 +810,7 @@ body {
   }
 
   .address-book__header {
-    padding: 0.85rem 0.65rem 0.4rem;
+    padding: 0.8rem 0.65rem 0.4rem;
   }
 
   .address-book__tabs,
@@ -738,14 +820,14 @@ body {
   }
 
   .address-book__tab {
-    min-height: 2.25rem;
+    min-height: 2rem;
     font-size: 0.72rem;
     padding-inline: 0.3rem;
   }
 
   .address-book__tabs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.3rem;
+    gap: 0.28rem;
   }
 
   .address-book__tab:first-child {
@@ -753,16 +835,16 @@ body {
   }
 
   .address-book__search {
-    padding: 0.58rem 0.62rem;
+    padding: 0.55rem 0.85rem 0.55rem 2.1rem;
     font-size: 0.82rem;
   }
 
   .address-book__list-wrap {
-    padding: 0 0.55rem;
+    padding: 0 0.5rem;
   }
 
   .address-book__service-card {
-    padding: 0.62rem;
+    padding: 0.62rem 0.65rem;
   }
 
   .address-book__service-head {
@@ -774,20 +856,20 @@ body {
     width: 1.8rem;
     height: 1.8rem;
     flex-basis: 1.8rem;
+    border-radius: 8px;
   }
 
   .address-book__service-title {
     font-size: 0.84rem;
-    line-height: 1.1;
   }
 
   .address-book__service-field {
     grid-template-columns: 1fr;
-    gap: 0.15rem;
+    gap: 0.12rem;
   }
 
   .address-book__service-field dt {
-    font-size: 0.66rem;
+    font-size: 0.64rem;
   }
 
   .address-book__service-field dd {
@@ -799,7 +881,7 @@ body {
   }
 
   .address-book__pager-btn {
-    padding: 0.35rem 0.45rem;
+    padding: 0.3rem 0.5rem;
     font-size: 0.74rem;
   }
 
