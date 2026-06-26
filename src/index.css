@@ -493,6 +493,14 @@ body {
 .address-book__list-scroll::-webkit-scrollbar-thumb  { background: #d1d5db; border-radius: 100px; }
 .address-book__list-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
+/* ─── Add service bottom bar ──────────────────────────────────────────────────*/
+
+.address-book__add-service-bar {
+  flex-shrink: 0;
+  padding: 0.5rem 0 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
 /* ─── Pagination ──────────────────────────────────────────────────────────────*/
 
 .address-book__pager {

@@ -759,14 +759,6 @@ export function AddressBookPanel({
       {activeTab === 'services' ? (
         <div className="address-book__list-wrap">
           <div className="address-book__list-scroll">
-            {isAdmin && (
-              <div style={{ padding: '8px 0 4px' }}>
-                <button type="button" onClick={() => setEditingService('new')}
-                  style={{ width: '100%', padding: '9px', borderRadius: 12, border: '1.5px dashed #99f6e4', background: '#f0fdfa', color: '#0f766e', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700 }}>
-                  + Add Service
-                </button>
-              </div>
-            )}
             <ul className="address-book__list address-book__services-list">
               {filteredServiceContacts.length === 0 ? (
                 <li className="address-book__empty">No service contacts match.</li>
@@ -810,6 +802,14 @@ export function AddressBookPanel({
               )}
             </ul>
           </div>
+          {isAdmin && (
+            <div className="address-book__add-service-bar">
+              <button type="button" onClick={() => setEditingService('new')}
+                style={{ width: '100%', padding: '9px', borderRadius: 12, border: '1.5px dashed #99f6e4', background: '#f0fdfa', color: '#0f766e', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 700 }}>
+                + Add Service
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         /* ── Tower directory tab ── */
