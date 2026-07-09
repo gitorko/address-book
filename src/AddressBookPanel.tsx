@@ -6,7 +6,8 @@ import type { SelectedHouse } from './scene/ApartmentScene'
 import type { ServiceContact } from './servicesConfig'
 import { buildTowerUnitRows } from './towerDirectory'
 import { getWindowWireframeColor } from './windowColors'
-import type { BulkImportPayload, BulkImportResult, DeleteDataResult } from './api'
+import { loadLoginEvents } from './api'
+import type { BulkImportPayload, BulkImportResult, DeleteDataResult, LoginEvent } from './api'
 
 const PAGE_SIZE = 36
 
@@ -448,6 +449,61 @@ function ImportModal({ onImport, onClose }: ImportModalProps) {
   )
 }
 
+// ─── Login history modal ──────────────────────────────────────────────────────
+
+function LoginHistoryModal({ onClose }: { onClose: () => void }) {
+  const [events, setEvents] = useState<LoginEvent[] | null>(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    loadLoginEvents()
+      .then(setEvents)
+      .catch(() => setError('Failed to load login history.'))
+  }, [])
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: '100%', maxWidth: 520, boxShadow: '0 20px 60px rgba(0,0,0,0.14)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontWeight: 800, fontSize: 17, color: '#111', marginBottom: 4 }}>Login History</div>
+        <div style={{ fontSize: 13, color: '#71717a', marginBottom: 14 }}>
+          Sign-in attempts from the last 30 days. Older entries are deleted automatically.
+        </div>
+
+        <div style={{ overflowY: 'auto', border: '1.5px solid #e4e4e7', borderRadius: 10, flex: 1, minHeight: 120 }}>
+          {error ? (
+            <div style={{ padding: 16, fontSize: 13, color: '#dc2626' }}>{error}</div>
+          ) : events === null ? (
+            <div style={{ padding: 16, fontSize: 13, color: '#71717a' }}>Loading…</div>
+          ) : events.length === 0 ? (
+            <div style={{ padding: 16, fontSize: 13, color: '#71717a' }}>No logins recorded in the last 30 days.</div>
+          ) : (
+            events.map((e, i) => (
+              <div key={`${e.at}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderTop: i > 0 ? '1px solid #f3f4f6' : 'none', fontSize: 13 }}>
+                <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, borderRadius: 100, padding: '2px 8px', color: e.success ? '#15803d' : '#dc2626', background: e.success ? '#f0fdf4' : '#fef2f2', border: `1px solid ${e.success ? '#bbf7d0' : '#fecaca'}` }}>
+                  {e.success ? 'OK' : 'FAIL'}
+                </span>
+                <span style={{ fontWeight: 700, color: '#111', flexShrink: 0 }}>{e.username || '(blank)'}</span>
+                <span style={{ color: '#71717a', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={e.userAgent ?? undefined}>
+                  {e.ip ?? 'local'}
+                </span>
+                <span style={{ color: '#71717a', flexShrink: 0, fontSize: 12 }}>{new Date(e.at).toLocaleString()}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        <button onClick={onClose}
+          style={{ marginTop: 14, background: '#f9fafb', border: '1.5px solid #e4e4e7', borderRadius: 10, padding: '10px', color: '#71717a', cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 600 }}>
+          Close
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Delete data modal ────────────────────────────────────────────────────────
 
 type DeleteDataModalProps = {
@@ -576,6 +632,7 @@ export function AddressBookPanel({
   const [showExport, setShowExport] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showDeleteData, setShowDeleteData] = useState(false)
+  const [showLogins, setShowLogins] = useState(false)
   const selectedRef = useRef(selected)
   // True when the search box itself triggered the selection — prevents clearing the query in that case
   const queryTriggeredSelectRef = useRef(false)
@@ -708,6 +765,7 @@ export function AddressBookPanel({
                         {[
                           { icon: '📤', label: 'Export data', action: () => { setShowExport(true); setShowMenu(false) } },
                           { icon: '📥', label: 'Import data', action: () => { setShowImport(true); setShowMenu(false) } },
+                          { icon: '👤', label: 'Login history', action: () => { setShowLogins(true); setShowMenu(false) } },
                           { icon: '🗑️', label: 'Delete data', action: () => { setShowDeleteData(true); setShowMenu(false) } },
                           { icon: '🚪', label: 'Sign out', action: () => { setShowMenu(false); onSignOut() } },
                         ].map(({ icon, label, action }, i, arr) => (
@@ -984,6 +1042,9 @@ export function AddressBookPanel({
           onClose={() => setShowImport(false)}
         />
       )}
+
+      {/* ── Login history modal ── */}
+      {showLogins && <LoginHistoryModal onClose={() => setShowLogins(false)} />}
 
       {/* ── Delete data modal ── */}
       {showDeleteData && (

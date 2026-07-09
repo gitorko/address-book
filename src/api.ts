@@ -195,6 +195,46 @@ export async function loadServices(): Promise<ServiceContact[]> {
   return fetch('/api/services').then((r) => r.json())
 }
 
+// ─── Login history ────────────────────────────────────────────────────────────
+
+export type LoginEvent = {
+  username: string
+  success: boolean
+  ip: string | null
+  userAgent: string | null
+  at: string // ISO timestamp
+}
+
+const LS_LOGINS_KEY = 'address-book-logins'
+const LOGIN_RETENTION_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
+
+function pruneLoginEvents(events: LoginEvent[]): LoginEvent[] {
+  const cutoff = Date.now() - LOGIN_RETENTION_MS
+  return events.filter((e) => new Date(e.at).getTime() >= cutoff)
+}
+
+/** Dev only — mirrors the server-side audit log in localStorage. */
+export function recordDevLogin(username: string, success: boolean): void {
+  try {
+    const events: LoginEvent[] = JSON.parse(localStorage.getItem(LS_LOGINS_KEY) || '[]')
+    events.unshift({ username, success, ip: null, userAgent: navigator.userAgent, at: new Date().toISOString() })
+    localStorage.setItem(LS_LOGINS_KEY, JSON.stringify(pruneLoginEvents(events)))
+  } catch {
+    // auditing must never block login itself
+  }
+}
+
+export async function loadLoginEvents(): Promise<LoginEvent[]> {
+  if (IS_DEV) {
+    try {
+      return pruneLoginEvents(JSON.parse(localStorage.getItem(LS_LOGINS_KEY) || '[]'))
+    } catch {
+      return []
+    }
+  }
+  return authFetch('/api/logins').then((r) => r.json())
+}
+
 // ─── Bulk import ──────────────────────────────────────────────────────────────
 
 export type BulkImportPayload = {

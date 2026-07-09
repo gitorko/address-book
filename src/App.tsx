@@ -13,6 +13,7 @@ import {
   servicesApi,
   bulkImport,
   deleteData,
+  recordDevLogin,
   type BulkImportPayload,
 } from './api'
 import { SCENE_TARGET_OFFSET_X, TOWER_ID_LEFT } from './buildingConstants'
@@ -39,7 +40,9 @@ function LoginModal({ onLogin, onClose }: { onLogin: (token: string) => void; on
     try {
       if (!import.meta.env.PROD) {
         // Dev mode: validate against VITE_AUTH_USER / VITE_AUTH_PASS in .env.local
-        if (username === import.meta.env.VITE_AUTH_USER && password === import.meta.env.VITE_AUTH_PASS) {
+        const ok = username === import.meta.env.VITE_AUTH_USER && password === import.meta.env.VITE_AUTH_PASS
+        recordDevLogin(username, ok)
+        if (ok) {
           localStorage.setItem(AUTH_KEY, 'dev')
           onLogin('dev')
         } else {

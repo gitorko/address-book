@@ -1,38 +1,25 @@
 # Address Book
 
-Interactive 3D apartment directory for Meru & Meadow towers (Tower 6 and Tower 7).
-
-The home page and directory are visible to all. Admin login is required to add or edit owner information.
+3D apartment directory for Meru & Meadow towers. Admin login required to edit.
 
 ## Run Locally
 
-1. Install dependencies: `npm install`
-2. Create `.env.local` with your admin login credentials:
-   ```
-   VITE_AUTH_USER=admin
-   VITE_AUTH_PASS=your-password
-   ```
-3. `npm run dev` → open `http://localhost:5173`
+```sh
+npm install
+npm run dev
+```
 
-> Data is saved to browser localStorage locally — no database needed.
+Create `.env.local`:
 
-## Deploy to Vercel
+```sh
+VITE_AUTH_USER=admin
+VITE_AUTH_PASS=your-password
+```
 
-1. Push to GitHub and import the repo in [vercel.com](https://vercel.com).
-2. Go to **Storage** → attach a **Postgres (Neon)** database.
-3. Go to **Settings → Environment Variables** and add:
+Local data is stored in browser localStorage.
 
-   | Variable | Value |
-   |---|---|
-   | `AUTH_USERNAME` | `admin` |
-   | `AUTH_PASSWORD` | your password |
-   | `AUTH_SECRET` | run `openssl rand -hex 32` |
+## Deploy (Vercel)
 
-4. Deploy.
-
-**To change the password:** update `AUTH_PASSWORD` in Vercel env vars and redeploy.
-
-## Seeding the Database
-
-After deploying, sign in as admin and use **⋮ → Import data** to bulk-import from `address-book-data.json`.
-The database tables (`owners`, `services`) are created automatically on first API call.
+1. Import the repo in [vercel.com](https://vercel.com) and attach a **Postgres (Neon)** database under **Storage**.
+2. Set env vars: `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SECRET` (`openssl rand -hex 32`).
+3. Deploy, sign in as admin, and import `address-book-data.json` via **⋮ → Import data**.
